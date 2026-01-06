@@ -14,10 +14,15 @@ function App() {
     setUser(null)
   }
 
+  // Update user data (name, email, etc.). For this prototype we just merge fields into `user`.
+  const handleUpdateUser = (updates) => {
+    setUser((prev) => ({ ...prev, ...updates }))
+  }
+
   return (
     <div className="app">
       {user ? (
-        <HomePage user={user} onLogout={handleLogout} />
+        <HomePage user={user} onLogout={handleLogout} onUpdateUser={handleUpdateUser} />
       ) : (
         <div className="login-container">
           <div className="mobile-frame">

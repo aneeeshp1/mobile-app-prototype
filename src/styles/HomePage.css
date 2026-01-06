@@ -47,20 +47,46 @@
   z-index: 10;
 }
 
-.status-bar {
-  padding: 12px 20px 8px;
+.app-header {
+  padding: 10px 16px;
+  margin-top: 12px;
   background: #f8f9fa;
   border-bottom: 1px solid #e0e0e0;
   display: flex;
-  justify-content: center;
-  margin-top: 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.time {
-  font-size: 12px;
-  font-weight: 600;
-  color: #000;
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+
+.app-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg,#667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 18px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.app-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: #333;
+}
+
+.home-header.small {
+  padding: 20px 20px 12px;
+}
+
 
 .home-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -194,4 +220,41 @@
   .feature-card {
     padding: 16px;
   }
+}
+
+/* Profile icon and overlay */
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  cursor: pointer;
+  font-weight: 700;
+  z-index: 40;
+  border: none;
+}
+
+
+.profile-initials {
+  color: #333;
+  font-size: 14px;
+}
+
+.panel-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.panel-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
 }
