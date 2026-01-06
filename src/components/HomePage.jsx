@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import '../styles/HomePage.css';
 import ProfilePanel from './ProfilePanel'
+import Calendar from './Calendar'
 
 export default function HomePage({ user, onLogout, onUpdateUser }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
@@ -8,6 +9,7 @@ export default function HomePage({ user, onLogout, onUpdateUser }) {
 
   const openProfile = () => setIsProfileOpen(true)
   const closeProfile = () => setIsProfileOpen(false)
+  const [calendarMode, setCalendarMode] = useState('gregorian') // 'gregorian' | 'lunar'
 
   return (
     <div className="home-container">
@@ -17,35 +19,35 @@ export default function HomePage({ user, onLogout, onUpdateUser }) {
             <div className="app-logo" aria-hidden>📅</div>
             <div className="app-title">My Calendar</div>
           </div>
-          <button className="profile-icon" onClick={openProfile} aria-label="Open profile">
-            <span className="profile-initials">{initials}</span>
-          </button>
+
+          <div className="header-controls">
+            <button
+              className={`calendar-toggle-switch ${calendarMode === 'lunar' ? 'lunar' : 'gregorian'}`}
+              onClick={() => setCalendarMode(prev => prev === 'gregorian' ? 'lunar' : 'gregorian')}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCalendarMode(prev => prev === 'gregorian' ? 'lunar' : 'gregorian') } }}
+              role="switch"
+              aria-checked={calendarMode === 'lunar'}
+              aria-label="Toggle calendar view"
+              title={calendarMode === 'lunar' ? 'Lunar calendar' : 'Gregorian calendar'}
+            >
+              <span className="toggle-icon sun" aria-hidden>☀️</span>
+              <span className="toggle-track" aria-hidden>
+                <span className={`toggle-knob ${calendarMode === 'lunar' ? 'right' : 'left'}`}></span>
+              </span>
+              <span className="toggle-icon moon" aria-hidden>🌙</span>
+            </button>
+
+            <button className="profile-icon" onClick={openProfile} aria-label="Open profile">
+              <span className="profile-initials">{initials}</span>
+            </button>
+          </div>
         </div>
 
 
         <div className="home-content">
-          <div className="feature-card">
-            <div className="card-icon">🎨</div>
-            <h3>Modern Design</h3>
-            <p>Clean and intuitive user interface</p>
-          </div>
-
-          <div className="feature-card">
-            <div className="card-icon">📱</div>
-            <h3>Mobile First</h3>
-            <p>Optimized for all mobile devices</p>
-          </div>
-
-          <div className="feature-card">
-            <div className="card-icon">⚡</div>
-            <h3>Fast & Responsive</h3>
-            <p>Smooth interactions and animations</p>
-          </div>
-
-          <div className="feature-card">
-            <div className="card-icon">🔒</div>
-            <h3>Secure</h3>
-            <p>Protected with authentication</p>
+          {/* Calendar component */}
+          <div className="calendar-container">
+            <Calendar mode={calendarMode} setMode={setCalendarMode} />
           </div>
         </div>
 
