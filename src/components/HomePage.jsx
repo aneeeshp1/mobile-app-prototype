@@ -15,7 +15,7 @@ export default function HomePage({ user, onLogout, onUpdateUser }) {
 
   const handleDayClick = (date) => {
     setSelectedDay(date)
-    setViewMode('week')
+    setViewMode('day')
   }
 
   const handleBackToCalendar = () => {
@@ -63,28 +63,28 @@ export default function HomePage({ user, onLogout, onUpdateUser }) {
                     Gregorian
                   </button>
                 </div>
+                <div className="view-tabs">
+                  <button
+                    className={`tab-btn ${viewMode === 'month' ? 'active' : ''}`}
+                    onClick={() => setViewMode('month')}
+                    aria-pressed={viewMode === 'month'}
+                  >
+                    Month
+                  </button>
+                  <button
+                    className={`tab-btn ${viewMode === 'week' ? 'active' : ''}`}
+                    onClick={() => {
+                      setViewMode('week')
+                      if (!selectedDay) setSelectedDay(new Date())
+                    }}
+                    aria-pressed={viewMode === 'week'}
+                  >
+                    Week
+                  </button>
+                </div>
               </div>
             </div>
             <div className="brand-right">
-              <div className="view-tabs">
-                <button
-                  className={`tab-btn ${viewMode === 'month' ? 'active' : ''}`}
-                  onClick={() => setViewMode('month')}
-                  aria-pressed={viewMode === 'month'}
-                >
-                  Month
-                </button>
-                <button
-                  className={`tab-btn ${viewMode === 'week' ? 'active' : ''}`}
-                  onClick={() => {
-                    setViewMode('week')
-                    if (!selectedDay) setSelectedDay(new Date())
-                  }}
-                  aria-pressed={viewMode === 'week'}
-                >
-                  Week
-                </button>
-              </div>
               <button className="notification-icon" aria-label="Notifications">
                 <span className="bell-emoji">🔔</span>
               </button>
