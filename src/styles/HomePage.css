@@ -552,10 +552,13 @@
 .calendar-cell {
   min-height: 40px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   border-radius: 8px;
   font-size: 13px;
+  padding: 6px 4px;
+  gap: 4px;
 }
 
 .calendar-cell.out-month {
@@ -582,6 +585,7 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  width: 100%;
 }
 
 .moon-date {
@@ -591,6 +595,35 @@
 
 .moon-emoji {
   font-size: 18px;
+}
+
+/* Event markers inside calendar cells */
+.event-list {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  margin-top: 2px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  min-height: 14px;
+}
+
+.event-dot {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.greg-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.greg-date {
+  font-size: 12px;
 }
 
 

@@ -36,27 +36,108 @@ function getLunarMonthName(gregorianMonth) {
 export default function Calendar({ mode: propMode, setMode: propSetMode }) {
   const today = new Date()
   const [current, setCurrent] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
-  const [modeState, setModeState] = useState('gregorian') // fallback local state
+  const [modeState, setModeState] = useState('lunar') // fallback local state
   const mode = propMode ?? modeState
   const setMode = propSetMode ?? setModeState
 
   const year = current.getFullYear()
   const month = current.getMonth()
-  const matrix = getMonthMatrix(year, month)
+  // Matrix will be selected per mode
+  let matrix = getMonthMatrix(year, month)
 
   const prevMonth = () => setCurrent(new Date(year, month - 1, 1))
   const nextMonth = () => setCurrent(new Date(year, month + 1, 1))
 
   const monthName = mode === 'lunar' ? getLunarMonthName(month) : current.toLocaleString(undefined, { month: 'long' })
 
-  // Lunar age calculation using 28-day lunar month
+  // Lunar calculation anchored to today's Gregorian day
+  function getLunarDayAndMonth(date) {
+    const today = new Date()
+    const todayGregorianDay = today.getDate()
+    
+    // Calculate days difference from today
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    const daysDiff = Math.floor((dateMidnight - todayMidnight) / (1000 * 60 * 60 * 24))
+    
+    // Today's lunar day equals today's Gregorian day
+    // Calculate lunar day for the target date
+    const lunarDayRaw = todayGregorianDay + daysDiff
+    
+    // Wrap into 28-day cycle (1-28)
+    const lunarDay = ((lunarDayRaw - 1) % 28 + 28) % 28 + 1
+    
+    // Calculate lunar month (each 28 days is a new month)
+    // Start counting months from today
+    const lunarMonthIndex = Math.floor((lunarDayRaw - 1) / 28)
+    const baseMonthIndex = today.getMonth()
+    const lunarMonth = ((baseMonthIndex + lunarMonthIndex) % 12 + 12) % 12
+    
+    return { lunarDay, lunarMonth, lunarMonthName: lunarMonthNames[lunarMonth] }
+  }
+
+  // Lunar age for moon phase (kept separate for moon emoji logic)
   function lunarAgeFor(date) {
-    const lunarMonth = 28 // Use 28-day lunar month
-    const epoch = Date.UTC(2000, 0, 6) // approximate known new moon reference
+    const lunarMonth = 28
+    const epoch = Date.UTC(2000, 0, 6)
     const d = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
     const days = (d - epoch) / (1000 * 60 * 60 * 24)
     const age = ((days % lunarMonth) + lunarMonth) % lunarMonth
-    return age // fractional age in days (0 .. 28)
+    return age
+  }
+
+  // Map lunar day (1..28) to dummy wellness events
+  const lunarEvents = {
+    1: [{ title: 'New Moon Breathwork', emoji: '🧘' }],
+    3: [{ title: 'Gentle Yoga & Stretch', emoji: '🧎' }],
+    7: [{ title: 'Sound Bath Therapy', emoji: '🎶' }],
+    10: [{ title: 'Herbal Tea Workshop', emoji: '🌿' }],
+    14: [{ title: 'Full Moon Meditation', emoji: '🌕' }],
+    18: [{ title: 'Acupressure Basics', emoji: '🤲' }],
+    21: [{ title: 'Herbal Healing Circle', emoji: '🍵' }],
+    24: [{ title: 'Nature Therapy Walk', emoji: '🌲' }],
+    27: [{ title: 'Breath & Cold Therapy', emoji: '❄️' }]
+  }
+
+  function lunarDayFor(date) {
+    return getLunarDayAndMonth(date).lunarDay
+  }
+
+  // Helpers to build a 28-day lunar month matrix
+  function addDays(date, delta) {
+    const copy = new Date(date)
+    copy.setDate(copy.getDate() + delta)
+    return copy
+  }
+
+  function getLunarMonthDates(anchorDate) {
+    // Find the nearest new moon before or on the anchor's first day
+    const threshold = 0.8 // tolerance around new moon
+    let start = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 1)
+    // Step backward up to 28 days to find age close to 0
+    for (let i = 0; i < 28 && lunarAgeFor(start) > threshold; i++) {
+      start = addDays(start, -1)
+    }
+    // Build 28 consecutive dates for the lunar month
+    const days = []
+    for (let i = 0; i < 28; i++) {
+      days.push(addDays(start, i))
+    }
+    return days
+  }
+
+  function getLunarMatrix(anchorDate) {
+    const days = getLunarMonthDates(anchorDate)
+    const matrix = []
+    for (let i = 0; i < 4; i++) {
+      matrix.push(days.slice(i * 7, i * 7 + 7))
+    }
+    return matrix
+  }
+
+  // Use lunar matrix when in lunar mode to ensure exactly 28 days
+  if (mode === 'lunar') {
+    matrix = getLunarMatrix(current)
   }
 
   return (
@@ -77,9 +158,9 @@ export default function Calendar({ mode: propMode, setMode: propSetMode }) {
         {matrix.map((week, wi) => (
           week.map((date, di) => {
             const isToday = date && date.toDateString() === today.toDateString()
-            const inMonth = date && date.getMonth() === month
+            const inMonth = mode === 'lunar' ? true : (date && date.getMonth() === month)
             const age = date ? lunarAgeFor(date) : null
-            const lunar = age != null ? Math.floor(age) + 1 : ''
+            const lunar = date ? getLunarDayAndMonth(date).lunarDay : ''
 
             function moonEmojiForAge(a) {
               if (a == null) return ''
@@ -92,15 +173,23 @@ export default function Calendar({ mode: propMode, setMode: propSetMode }) {
             }
 
             const moonEmoji = age != null ? moonEmojiForAge(age) : ''
+            // Determine events for this cell (use lunar day mapping for both modes)
+            const cellLunarDay = date ? lunarDayFor(date) : null
+            const events = cellLunarDay ? lunarEvents[cellLunarDay] || [] : []
+
+            // Build hover/aria label showing lunar + Gregorian info
             let title = ''
+            let ariaLabel = ''
             if (date) {
-              if (mode === 'lunar') {
-                if (moonEmoji === '🌑') title = `New moon — age ${age.toFixed(1)}d (Lunar day ${lunar})`
-                else if (moonEmoji === '🌕') title = `Full moon — age ${age.toFixed(1)}d (Lunar day ${lunar})`
-                else title = `Lunar day ${lunar} — age ${age.toFixed(1)}d`
-              } else {
-                title = `Gregorian ${date.toDateString()}`
-              }
+              const lunarInfo = getLunarDayAndMonth(date)
+              const gregLabel = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+              const lunarLabel = `${lunarInfo.lunarMonthName}, Day ${lunarInfo.lunarDay}`
+              const moonLabel = moonEmoji ? `${moonEmoji} ${lunarLabel}`.trim() : lunarLabel
+              const eventLabel = events.length ? `Events: ${events.map(e => e.title).join(', ')}` : ''
+              const lines = [moonLabel || lunarLabel, `Gregorian: ${gregLabel}`]
+              if (eventLabel) lines.push(eventLabel)
+              title = lines.join('\n') // multiline native tooltip
+              ariaLabel = lines.join('. ')
             }
 
             return (
@@ -109,15 +198,27 @@ export default function Calendar({ mode: propMode, setMode: propSetMode }) {
                 className={`calendar-cell ${inMonth ? 'in-month' : 'out-month'} ${isToday ? 'today' : ''} ${mode === 'lunar' ? 'moon' : ''}`}
                 aria-current={isToday ? 'date' : undefined}
                 title={title}
-                aria-label={title}
+                aria-label={ariaLabel || title}
               >
                 {mode === 'lunar' ? (
                   <div className="moon-cell">
-                    <div className="moon-date">{date ? date.getDate() : ''}</div>
+                    <div className="moon-date">{lunar}</div>
                     {moonEmoji && <div className="moon-emoji">{moonEmoji}</div>}
+                    {events.length > 0 && !moonEmoji && (
+                      <div className="event-list" aria-label="Events">
+                        <span className="event-dot" aria-hidden="true">{events[0].emoji || '•'}</span>
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  date ? date.getDate() : ''
+                  <div className="greg-cell">
+                    <div className="greg-date">{date ? date.getDate() : ''}</div>
+                    {events.length > 0 && (
+                      <div className="event-list" aria-label="Events">
+                        <span className="event-dot" aria-hidden="true">{events[0].emoji || '•'}</span>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             )

@@ -9,7 +9,7 @@ export default function HomePage({ user, onLogout, onUpdateUser }) {
 
   const openProfile = () => setIsProfileOpen(true)
   const closeProfile = () => setIsProfileOpen(false)
-  const [calendarMode, setCalendarMode] = useState('gregorian') // 'gregorian' | 'lunar'
+  const [calendarMode, setCalendarMode] = useState('lunar') // 'gregorian' | 'lunar'
 
   return (
     <div className="home-container">
@@ -29,18 +29,18 @@ export default function HomePage({ user, onLogout, onUpdateUser }) {
               </div>
               <div className="calendar-tabs">
                 <button
-                  className={`tab-btn ${calendarMode === 'gregorian' ? 'active' : ''}`}
-                  onClick={() => setCalendarMode('gregorian')}
-                  aria-pressed={calendarMode === 'gregorian'}
-                >
-                  Gregorian
-                </button>
-                <button
                   className={`tab-btn ${calendarMode === 'lunar' ? 'active' : ''}`}
                   onClick={() => setCalendarMode('lunar')}
                   aria-pressed={calendarMode === 'lunar'}
                 >
                   Lunar
+                </button>
+                <button
+                  className={`tab-btn ${calendarMode === 'gregorian' ? 'active' : ''}`}
+                  onClick={() => setCalendarMode('gregorian')}
+                  aria-pressed={calendarMode === 'gregorian'}
+                >
+                  Gregorian
                 </button>
               </div>
             </div>
