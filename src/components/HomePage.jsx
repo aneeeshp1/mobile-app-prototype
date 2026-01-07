@@ -10,6 +10,25 @@ export default function HomePage({ user, onLogout, onUpdateUser }) {
   const openProfile = () => setIsProfileOpen(true)
   const closeProfile = () => setIsProfileOpen(false)
   const [calendarMode, setCalendarMode] = useState('lunar') // 'gregorian' | 'lunar'
+  const [viewMode, setViewMode] = useState('month') // 'month' | 'week'
+  const [selectedDay, setSelectedDay] = useState(null)
+
+  const handleDayClick = (date) => {
+    setSelectedDay(date)
+    setViewMode('week')
+  }
+
+  const handleBackToCalendar = () => {
+    setViewMode('month')
+  }
+
+  const handleDayNavigation = (direction) => {
+    if (selectedDay) {
+      const newDate = new Date(selectedDay)
+      newDate.setDate(newDate.getDate() + direction)
+      setSelectedDay(newDate)
+    }
+  }
 
   return (
     <div className="home-container">
@@ -27,24 +46,45 @@ export default function HomePage({ user, onLogout, onUpdateUser }) {
                 </button>
                 <div className="app-title">Calendar</div>
               </div>
-              <div className="calendar-tabs">
-                <button
-                  className={`tab-btn ${calendarMode === 'lunar' ? 'active' : ''}`}
-                  onClick={() => setCalendarMode('lunar')}
-                  aria-pressed={calendarMode === 'lunar'}
-                >
-                  Lunar
-                </button>
-                <button
-                  className={`tab-btn ${calendarMode === 'gregorian' ? 'active' : ''}`}
-                  onClick={() => setCalendarMode('gregorian')}
-                  aria-pressed={calendarMode === 'gregorian'}
-                >
-                  Gregorian
-                </button>
+              <div className="header-tabs">
+                <div className="calendar-tabs">
+                  <button
+                    className={`tab-btn ${calendarMode === 'lunar' ? 'active' : ''}`}
+                    onClick={() => setCalendarMode('lunar')}
+                    aria-pressed={calendarMode === 'lunar'}
+                  >
+                    Lunar
+                  </button>
+                  <button
+                    className={`tab-btn ${calendarMode === 'gregorian' ? 'active' : ''}`}
+                    onClick={() => setCalendarMode('gregorian')}
+                    aria-pressed={calendarMode === 'gregorian'}
+                  >
+                    Gregorian
+                  </button>
+                </div>
               </div>
             </div>
             <div className="brand-right">
+              <div className="view-tabs">
+                <button
+                  className={`tab-btn ${viewMode === 'month' ? 'active' : ''}`}
+                  onClick={() => setViewMode('month')}
+                  aria-pressed={viewMode === 'month'}
+                >
+                  Month
+                </button>
+                <button
+                  className={`tab-btn ${viewMode === 'week' ? 'active' : ''}`}
+                  onClick={() => {
+                    setViewMode('week')
+                    if (!selectedDay) setSelectedDay(new Date())
+                  }}
+                  aria-pressed={viewMode === 'week'}
+                >
+                  Week
+                </button>
+              </div>
               <button className="notification-icon" aria-label="Notifications">
                 <span className="bell-emoji">🔔</span>
               </button>
@@ -55,7 +95,15 @@ export default function HomePage({ user, onLogout, onUpdateUser }) {
         <div className="home-content">
           {/* Calendar component */}
           <div className="calendar-container">
-            <Calendar mode={calendarMode} setMode={setCalendarMode} />
+            <Calendar 
+              mode={calendarMode} 
+              setMode={setCalendarMode}
+              viewMode={viewMode}
+              onDayClick={handleDayClick}
+              selectedDay={selectedDay}
+              onBackToCalendar={handleBackToCalendar}
+              onDayNavigation={handleDayNavigation}
+            />
           </div>
         </div>
 

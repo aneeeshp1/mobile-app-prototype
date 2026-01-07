@@ -4,7 +4,8 @@ import HomePage from './components/HomePage'
 import './App.css'
 
 function App() {
-  const [user, setUser] = useState(null)
+  // Temporarily bypass login: start with a dummy user
+  const [user, setUser] = useState({ name: 'Test User', email: 'test@test.com' })
 
   const handleLoginSuccess = (userData) => {
     setUser(userData)
@@ -21,18 +22,7 @@ function App() {
 
   return (
     <div className="app">
-      {user ? (
-        <HomePage user={user} onLogout={handleLogout} onUpdateUser={handleUpdateUser} />
-      ) : (
-        <div className="login-container">
-          <div className="mobile-frame">
-            <div className="status-bar">
-              <span className="time">9:41</span>
-            </div>
-            <LoginForm onLoginSuccess={handleLoginSuccess} />
-          </div>
-        </div>
-      )}
+      <HomePage user={user} onLogout={handleLogout} onUpdateUser={handleUpdateUser} />
     </div>
   )
 }

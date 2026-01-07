@@ -33,7 +33,7 @@ function getLunarMonthName(gregorianMonth) {
   return lunarMonthNames[gregorianMonth] || 'Lunar Month'
 }
 
-export default function Calendar({ mode: propMode, setMode: propSetMode }) {
+export default function Calendar({ mode: propMode, setMode: propSetMode, viewMode, onDayClick, selectedDay, onBackToCalendar, onDayNavigation }) {
   const today = new Date()
   const [current, setCurrent] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
   const [modeState, setModeState] = useState('lunar') // fallback local state
@@ -140,6 +140,115 @@ export default function Calendar({ mode: propMode, setMode: propSetMode }) {
     matrix = getLunarMatrix(current)
   }
 
+  // If week view is active, render week view instead
+  if (viewMode === 'week' && selectedDay) {
+    const lunarInfo = getLunarDayAndMonth(selectedDay)
+    const age = lunarAgeFor(selectedDay)
+    const cellLunarDay = lunarDayFor(selectedDay)
+    const events = cellLunarDay ? lunarEvents[cellLunarDay] || [] : []
+    
+    function moonEmojiForAge(a) {
+      if (a == null) return ''
+      const fullAge = 14
+      const threshold = 0.8
+      if (Math.abs(a - fullAge) < threshold) return '🌕'
+      if (a < threshold || a > 28 - threshold) return '🌑'
+      return ''
+    }
+    
+    const moonEmoji = moonEmojiForAge(age)
+    
+    // Get the week (Sunday to Saturday)
+    const dayOfWeek = selectedDay.getDay()
+    const weekStart = new Date(selectedDay)
+    weekStart.setDate(selectedDay.getDate() - dayOfWeek)
+    
+    const weekDays = []
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart)
+      d.setDate(weekStart.getDate() + i)
+      weekDays.push(d)
+    }
+
+    return (
+      <div className="day-view" role="application" aria-label="Week view">
+        <div className="week-view-header">
+          <button 
+            className="week-nav-btn" 
+            onClick={() => {
+              const prevWeek = new Date(selectedDay)
+              prevWeek.setDate(prevWeek.getDate() - 7)
+              onDayNavigation(-7)
+            }}
+            aria-label="Previous week"
+          >
+            ◀ Previous
+          </button>
+          <button 
+            className="week-nav-btn" 
+            onClick={() => {
+              const nextWeek = new Date(selectedDay)
+              nextWeek.setDate(nextWeek.getDate() + 7)
+              onDayNavigation(7)
+            }}
+            aria-label="Next week"
+          >
+            Next ▶
+          </button>
+        </div>
+        
+        <div className="week-navigation">
+          {weekDays.map((day, idx) => {
+            const isSelected = day.toDateString() === selectedDay.toDateString()
+            const lunarInfo = mode === 'lunar' ? getLunarDayAndMonth(day) : null
+            const displayDay = mode === 'lunar' ? lunarInfo.lunarDay : day.getDate()
+            return (
+              <button
+                key={idx}
+                className={`week-day-circle ${isSelected ? 'selected' : ''}`}
+                onClick={() => onDayNavigation(day.getDate() - selectedDay.getDate())}
+                aria-label={`${day.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}`}
+                aria-pressed={isSelected}
+              >
+                <div className="week-day-number">{displayDay}</div>
+                <div className="week-day-label">{day.toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 1)}</div>
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="day-details">
+          <div className="day-info-card">
+            <div className="day-info-row">
+              <span className="day-info-label">Lunar:</span>
+              <span className="day-info-value">{moonEmoji} {lunarInfo.lunarMonthName}, Day {lunarInfo.lunarDay}</span>
+            </div>
+            <div className="day-info-row">
+              <span className="day-info-label">Gregorian:</span>
+              <span className="day-info-value">{selectedDay.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
+            </div>
+          </div>
+
+          {events.length > 0 ? (
+            <div className="day-events">
+              <h3 className="day-events-title">Events</h3>
+              {events.map((event, idx) => (
+                <div key={idx} className="event-card">
+                  <div className="event-card-emoji">{event.emoji}</div>
+                  <div className="event-card-content">
+                    <div className="event-card-title">{event.title}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="day-no-events">No events scheduled</div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="calendar" role="application" aria-label={`Calendar ${monthName} ${year}`}>
       <div className="calendar-header">
@@ -199,6 +308,8 @@ export default function Calendar({ mode: propMode, setMode: propSetMode }) {
                 aria-current={isToday ? 'date' : undefined}
                 title={title}
                 aria-label={ariaLabel || title}
+                onClick={() => date && onDayClick && onDayClick(date)}
+                style={{ cursor: date ? 'pointer' : 'default' }}
               >
                 {mode === 'lunar' ? (
                   <div className="moon-cell">
