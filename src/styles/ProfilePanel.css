@@ -1,13 +1,13 @@
 .profile-panel {
   position: absolute;
   top: 0;
-  right: 0;
+  left: 0;
   height: 100%;
   width: 320px;
   max-width: 85%;
   background: #fff;
-  box-shadow: -20px 0 40px rgba(0,0,0,0.15);
-  transform: translateX(110%);
+  box-shadow: 20px 0 40px rgba(0,0,0,0.15);
+  transform: translateX(-110%);
   transition: transform 0.35s ease;
   z-index: 50;
   display: flex;

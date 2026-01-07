@@ -43,7 +43,10 @@ export default function LoginForm({ onLoginSuccess }) {
     <div className="login-form-wrapper">
       <div className="login-card">
         <div className="login-header">
-          <h1>Mobile App</h1>
+          <div className="login-logo-wrap" aria-hidden>
+            <img className="login-logo" src="https://undiagnosedsociety.org/wp-content/uploads/2024/03/Color-logo-no-background-2048x2036.png" alt="Healing App logo" loading="lazy" />
+          </div>
+          <h1>Healing App</h1>
           <p>Welcome to the prototype</p>
         </div>
 

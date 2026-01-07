@@ -22,6 +22,17 @@ function getMonthMatrix(year, month) {
   return matrix
 }
 
+// Custom lunar month names
+const lunarMonthNames = [
+  'Moon of Beginnings', 'Moon of Awakening', 'Moon of Growth', 'Moon of Light',
+  'Moon of Warmth', 'Moon of Abundance', 'Moon of Peak', 'Moon of Harvest',
+  'Moon of Balance', 'Moon of Change', 'Moon of Reflection', 'Moon of Stillness'
+]
+
+function getLunarMonthName(gregorianMonth) {
+  return lunarMonthNames[gregorianMonth] || 'Lunar Month'
+}
+
 export default function Calendar({ mode: propMode, setMode: propSetMode }) {
   const today = new Date()
   const [current, setCurrent] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
@@ -36,16 +47,16 @@ export default function Calendar({ mode: propMode, setMode: propSetMode }) {
   const prevMonth = () => setCurrent(new Date(year, month - 1, 1))
   const nextMonth = () => setCurrent(new Date(year, month + 1, 1))
 
-  const monthName = current.toLocaleString(undefined, { month: 'long' })
+  const monthName = mode === 'lunar' ? getLunarMonthName(month) : current.toLocaleString(undefined, { month: 'long' })
 
-  // Fractional lunar age calculation (synodic month ~29.53 days)
+  // Lunar age calculation using 28-day lunar month
   function lunarAgeFor(date) {
-    const synodic = 29.530588853
+    const lunarMonth = 28 // Use 28-day lunar month
     const epoch = Date.UTC(2000, 0, 6) // approximate known new moon reference
     const d = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
     const days = (d - epoch) / (1000 * 60 * 60 * 24)
-    const age = ((days % synodic) + synodic) % synodic
-    return age // fractional age in days (0 .. synodic)
+    const age = ((days % lunarMonth) + lunarMonth) % lunarMonth
+    return age // fractional age in days (0 .. 28)
   }
 
   return (
@@ -72,12 +83,11 @@ export default function Calendar({ mode: propMode, setMode: propSetMode }) {
 
             function moonEmojiForAge(a) {
               if (a == null) return ''
-              const synodic = 29.530588853
-              const fullAge = synodic / 2
-              const threshold = 0.8 // days tolerance to single-out full/new moon
+              const fullAge = 14 // day 14 is full moon in 28-day cycle
+              const threshold = 0.8 // days tolerance
 
               if (Math.abs(a - fullAge) < threshold) return '🌕' // Full moon
-              if (a < threshold || a > synodic - threshold) return '🌑' // New moon
+              if (a < threshold || a > 28 - threshold) return '🌑' // New moon
               return ''
             }
 

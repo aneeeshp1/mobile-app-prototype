@@ -15,6 +15,41 @@
   animation: slideUp 0.5s ease-out;
 }
 
+.login-header {
+  background: linear-gradient(135deg, #4f46e5 0%, #0ea5a9 100%);
+  color: white;
+  padding: 32px 20px 20px;
+  text-align: center;
+  border-bottom: none;
+}
+
+.login-logo-wrap {
+  display: block;
+  margin: 0 auto 10px auto;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: white;
+  padding: 6px;
+  box-shadow: 0 6px 20px rgba(16,24,40,0.08);
+}
+
+.login-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
+  mix-blend-mode: unset;
+  filter: none;
+}
+
+.login-header h1 {
+  font-size: 22px;
+  margin: 0 0 4px 0;
+  font-weight: 700;
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -27,10 +62,32 @@
 }
 
 .login-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f7fc 100%);
+  color: #0f172a;
   padding: 24px 20px 20px;
   text-align: center;
+  border-bottom: 1px solid #e6eefc;
+}
+
+.login-logo-wrap {
+  display: block;
+  margin: 0 auto 10px auto;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: white;
+  padding: 6px;
+  box-shadow: 0 6px 20px rgba(16,24,40,0.08);
+}
+
+.login-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
+  mix-blend-mode: unset;
+  filter: none;
 }
 
 .login-header h1 {

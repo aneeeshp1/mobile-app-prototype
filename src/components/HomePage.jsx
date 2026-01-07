@@ -16,33 +16,41 @@ export default function HomePage({ user, onLogout, onUpdateUser }) {
       <div className="mobile-frame">
         <div className="app-header">
           <div className="app-brand">
-            <div className="app-logo" aria-hidden>📅</div>
-            <div className="app-title">My Calendar</div>
-          </div>
-
-          <div className="header-controls">
-            <button
-              className={`calendar-toggle-switch ${calendarMode === 'lunar' ? 'lunar' : 'gregorian'}`}
-              onClick={() => setCalendarMode(prev => prev === 'gregorian' ? 'lunar' : 'gregorian')}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCalendarMode(prev => prev === 'gregorian' ? 'lunar' : 'gregorian') } }}
-              role="switch"
-              aria-checked={calendarMode === 'lunar'}
-              aria-label="Toggle calendar view"
-              title={calendarMode === 'lunar' ? 'Lunar calendar' : 'Gregorian calendar'}
-            >
-              <span className="toggle-icon sun" aria-hidden>☀️</span>
-              <span className="toggle-track" aria-hidden>
-                <span className={`toggle-knob ${calendarMode === 'lunar' ? 'right' : 'left'}`}></span>
-              </span>
-              <span className="toggle-icon moon" aria-hidden>🌙</span>
-            </button>
-
-            <button className="profile-icon" onClick={openProfile} aria-label="Open profile">
-              <span className="profile-initials">{initials}</span>
-            </button>
+            <div className="brand-left">
+              <div className="profile-row">
+                <button className="profile-icon" onClick={openProfile} aria-label="Open profile">
+                  <img 
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} 
+                    alt={`${user.name}'s avatar`}
+                    className="profile-avatar"
+                  />
+                </button>
+                <div className="app-title">Calendar</div>
+              </div>
+              <div className="calendar-tabs">
+                <button
+                  className={`tab-btn ${calendarMode === 'gregorian' ? 'active' : ''}`}
+                  onClick={() => setCalendarMode('gregorian')}
+                  aria-pressed={calendarMode === 'gregorian'}
+                >
+                  Gregorian
+                </button>
+                <button
+                  className={`tab-btn ${calendarMode === 'lunar' ? 'active' : ''}`}
+                  onClick={() => setCalendarMode('lunar')}
+                  aria-pressed={calendarMode === 'lunar'}
+                >
+                  Lunar
+                </button>
+              </div>
+            </div>
+            <div className="brand-right">
+              <button className="notification-icon" aria-label="Notifications">
+                <span className="bell-emoji">🔔</span>
+              </button>
+            </div>
           </div>
         </div>
-
 
         <div className="home-content">
           {/* Calendar component */}
@@ -51,16 +59,9 @@ export default function HomePage({ user, onLogout, onUpdateUser }) {
           </div>
         </div>
 
-        <div className="home-footer">
-          <p>User: {user.email}</p>
-          <button className="logout-button" onClick={onLogout}>
-            Sign Out
-          </button>
-        </div>
-
         {/* Overlay and profile panel */}
         <div className={`panel-overlay ${isProfileOpen ? 'open' : ''}`} onClick={closeProfile} aria-hidden={!isProfileOpen}></div>
-        <ProfilePanel user={user} isOpen={isProfileOpen} onClose={closeProfile} onUpdateUser={onUpdateUser} />
+        <ProfilePanel user={user} isOpen={isProfileOpen} onClose={closeProfile} onUpdateUser={onUpdateUser} onLogout={onLogout} />
       </div>
     </div>
   );
